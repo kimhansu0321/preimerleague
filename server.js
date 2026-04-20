@@ -11,6 +11,29 @@ app.use(express.json());
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Debug Runtime Environment
+app.get('/api/debug', (req, res) => {
+    const fs = require('fs');
+    try {
+        const cwd = process.cwd();
+        const files = fs.readdirSync(cwd);
+        const dirnameFiles = fs.readdirSync(__dirname);
+        const dbPath = path.join(cwd, 'premier_league.db');
+        const dbExists = fs.existsSync(dbPath);
+        res.json({
+            cwd,
+            dirname: __dirname,
+            cwdFiles: files,
+            dirnameFiles,
+            dbExists,
+            dbPath,
+            vercel: process.env.VERCEL || 'no'
+        });
+    } catch(e) {
+        res.status(500).json({error: e.toString()});
+    }
+});
+
 // API Endpoint to get all nations
 app.get('/api/nations', (req, res) => {
     db.all(`SELECT * FROM nations ORDER BY name ASC`, [], (err, rows) => {

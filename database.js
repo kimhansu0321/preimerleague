@@ -1,9 +1,23 @@
-const sqlite3 = require('sqlite3').verbose();
+let sqlite3;
+let dbMode;
 const path = require('path');
+const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+
+try {
+    sqlite3 = require('sqlite3').verbose();
+    dbMode = isVercel ? sqlite3.OPEN_READONLY : (sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
+} catch (e) {
+    console.error("FATAL PLUGIN ERROR: sqlite3 native binding failed", e);
+    // Mock the sqlite3 object to prevent server crash
+    sqlite3 = { 
+        Database: function(path, mode, cb) { 
+            if (cb) cb(new Error("SQLite is utterly unsupported in this environment.")); 
+        } 
+    };
+    dbMode = 1;
+}
 
 const dbPath = path.join(process.cwd(), 'premier_league.db');
-const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-const dbMode = isVercel ? sqlite3.OPEN_READONLY : (sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 
 // Initialize in-memory/file database
 const db = new sqlite3.Database(dbPath, dbMode, (err) => {
