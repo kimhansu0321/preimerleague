@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": "../premier_league.db"
+      "includeFiles": "premier_league.db"
     }
   },
   "rewrites": [
