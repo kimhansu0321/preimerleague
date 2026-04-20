@@ -1,13 +1,19 @@
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+const dbPath = path.join(process.cwd(), 'premier_league.db');
+const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+const dbMode = isVercel ? sqlite3.OPEN_READONLY : (sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 
 // Initialize in-memory/file database
-const db = new sqlite3.Database('./premier_league.db', (err) => {
+const db = new sqlite3.Database(dbPath, dbMode, (err) => {
     if (err) {
         console.error('Error opening database ', err.message);
     } else {
         console.log('Connected to the SQLite database.');
-        db.serialize(() => {
-            db.run(`CREATE TABLE IF NOT EXISTS nations (
+        if (!isVercel) {
+            db.serialize(() => {
+                db.run(`CREATE TABLE IF NOT EXISTS nations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 code TEXT NOT NULL
@@ -29,11 +35,12 @@ const db = new sqlite3.Database('./premier_league.db', (err) => {
 
             // Seed initial data if empty
             db.get("SELECT count(*) as count FROM nations", (err, row) => {
-                if (row.count === 0) {
+                if (row && row.count === 0) {
                     seedDatabase();
                 }
             });
         });
+        }
     }
 });
 

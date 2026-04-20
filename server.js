@@ -52,6 +52,9 @@ app.get('/api/players', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running gracefully on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running gracefully on http://localhost:${PORT}`);
+    });
+}
+module.exports = app;
