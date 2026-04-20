@@ -1,0 +1,5 @@
+node_modules/
+.env
+.DS_Store
+tmp_get_images.js
+tmp_update_db.js
